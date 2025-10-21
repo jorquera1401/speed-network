@@ -1,3 +1,11 @@
+//
+//  HistoryView.swift
+//  speed-network
+//
+//  Created by Miguel Jorquera on 25-09-25.
+//
+
+import SwiftUI
 import Charts
 
 struct HistoryView: View {
@@ -9,13 +17,13 @@ struct HistoryView: View {
                 .font(.headline)
             
             Chart(monitor.history, id: \.time) {
-                LineMark(
+                BarMark(
                     x: .value("Tiempo", $0.time),
                     y: .value("Download", $0.download)
                 )
                 .foregroundStyle(.blue)
                 
-                LineMark(
+                BarMark(
                     x: .value("Tiempo", $0.time),
                     y: .value("Upload", $0.upload)
                 )
