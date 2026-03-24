@@ -10,28 +10,61 @@ import Charts
 
 struct HistoryView: View {
     @ObservedObject var monitor: NetworkMonitor
-    
+
+    private var lastDownload: Double { monitor.history.last?.download ?? 0 }
+    private var lastUpload: Double { monitor.history.last?.upload ?? 0 }
+
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 8) {
             Text("Histórico de velocidad")
                 .font(.headline)
-            
-            Chart(monitor.history, id: \.time) {
-                BarMark(
-                    x: .value("Tiempo", $0.time),
-                    y: .value("Download", $0.download)
-                )
-                .foregroundStyle(.blue)
-                
-                BarMark(
-                    x: .value("Tiempo", $0.time),
-                    y: .value("Upload", $0.upload)
-                )
-                .foregroundStyle(.red)
+
+            // Velocidades actuales
+            HStack(spacing: 16) {
+                Label {
+                    Text(String(format: "%.1f Mbps", lastDownload))
+                        .monospacedDigit()
+                } icon: {
+                    Image(systemName: "arrow.down")
+                        .foregroundColor(.blue)
+                }
+
+                Label {
+                    Text(String(format: "%.1f Mbps", lastUpload))
+                        .monospacedDigit()
+                } icon: {
+                    Image(systemName: "arrow.up")
+                        .foregroundColor(.red)
+                }
             }
-            .frame(height: 200)
+            .font(.subheadline)
+
+            // Gráfico
+            Chart {
+                ForEach(monitor.history, id: \.time) { point in
+                    LineMark(
+                        x: .value("Tiempo", point.time),
+                        y: .value("Mbps", point.download),
+                        series: .value("Tipo", "Bajada")
+                    )
+                    .foregroundStyle(.blue)
+                    .interpolationMethod(.monotone)
+
+                    LineMark(
+                        x: .value("Tiempo", point.time),
+                        y: .value("Mbps", point.upload),
+                        series: .value("Tipo", "Subida")
+                    )
+                    .foregroundStyle(.red)
+                    .interpolationMethod(.monotone)
+                }
+            }
+            .chartYAxisLabel("Mbps")
+            .chartXAxis(.hidden)
+            .chartLegend(position: .bottom, alignment: .center)
+            .frame(height: 180)
         }
         .padding()
-        .frame(width: 400, height: 250)
+        .frame(width: 420, height: 290)
     }
 }
